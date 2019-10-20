@@ -35,7 +35,7 @@ class CLI < Thor
 
     study_minutes = (finished_time - started_time).to_i / 60
 
-    puts '今回の学習時間は#{study_minutes}分です'
+    puts "今回の学習時間は#{study_minutes}分です"
 
     puts '学習内容を記入してください'
     study_content = STDIN.gets.chomp
