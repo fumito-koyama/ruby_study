@@ -45,9 +45,8 @@ end
 
 desc 'output total time'
 task :total do
-  t = 0
-  CSV.read(history_file).each{|row| t += row[2].to_i}
-  puts "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
+  total = CSV.read(history_file).map { |row| row[2].to_i }.sum
+  puts "現在までの合計の学習時間は#{total/60}時間#{total%60}分です"
 end
 
 def to_time_object(time)
