@@ -4,7 +4,7 @@ require 'csv'
 
 class CLI < Thor
 
-    desc 'study start', 'cleate file'
+    desc 'start', 'study start'
     def start
         unless File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
             
@@ -18,7 +18,7 @@ class CLI < Thor
         end
     end
 
-    desc 'study finish', 'rw file'
+    desc 'finish', 'study finish'
     def finish
         if File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
 
@@ -46,19 +46,17 @@ class CLI < Thor
         end
     end
 
-    desc 'output total', 'read file'
+    desc 'total', 'output total time'
     def total
         t = 0
         CSV.read('/Users/fumito/dev/ruby_task/ruby_study/history.csv').each{|row| t += row[2].to_i}
-        p "合計の学習時間は#{t/60}時間#{t%60}分です"
+        p "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
     end
 
     # def stop
-    #     @study.stop
     # end
 
     # def restart
-    #     @study.restart
     # end
     private
         def to_time_object(time)
