@@ -9,12 +9,12 @@ class CLI < Thor
     unless File.exists? time_file
 
       time = Time.now
-      p "[#{time.strftime("%R")}]学習を開始しました"
+      puts "[#{time.strftime("%R")}]学習を開始しました"
       File.open(time_file, 'w') do |txt|
-        txt.puts time.strftime("%Y,%m,%d,%H,%M,%S")
+        txt.puts time.strftime('%Y,%m,%d,%H,%M,%S')
       end
     else
-      p 'すでに学習を始めています'
+      puts 'すでに学習を始めています'
     end
   end
 
@@ -23,7 +23,7 @@ class CLI < Thor
     if File.exists? time_file
 
       finished_time = Time.now
-      p "[#{finished_time.strftime("%R")}]学習を終了しました"
+      puts "[#{finished_time.strftime("%R")}]学習を終了しました"
       started_time = File.open(time_file).read
       File.delete(time_file)
 
@@ -31,18 +31,18 @@ class CLI < Thor
 
       study_minutes = (finished_time - started_time).to_i / 60
 
-      p "今回の学習時間は#{study_minutes}分です"
+      puts '今回の学習時間は#{study_minutes}分です'
 
-      p '学習内容を記入してください'
+      puts '学習内容を記入してください'
       study_content = STDIN.gets.chomp
 
       CSV.open(history_file, 'a') do |csv|
-        csv << [started_time.strftime("%Y-%m-%d %H:%M"),
-                finished_time.strftime("%Y-%m-%d %H:%M"),
+        csv << [started_time.strftime('%Y-%m-%d %H:%M'),
+                finished_time.strftime('%Y-%m-%d %H:%M'),
                 study_minutes, study_content]
       end
     else
-      p '学習を開始していません'
+      puts '学習を開始していません'
     end
   end
 
@@ -50,7 +50,7 @@ class CLI < Thor
   def total
     t = 0
     CSV.read(history_file).each{|row| t += row[2].to_i}
-    p "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
+    puts "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
   end
 
   # def stop
