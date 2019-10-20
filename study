@@ -1,6 +1,7 @@
 require 'thor'
 #require 'fileutils'
 require 'csv'
+require 'time'
 
 class CLI < Thor
 
@@ -12,9 +13,9 @@ class CLI < Thor
     end
 
     time = Time.now
-    puts "[#{time.strftime("%R")}]学習を開始しました"
-    File.open(time_file, 'w') do |txt|
-      txt.puts time.strftime('%Y,%m,%d,%H,%M,%S')
+    File.open(time_file, 'w') do |file|
+      file.puts time.to_s
+      puts "[#{time.strftime("%R")}]学習を開始しました"
     end
   end
 
@@ -61,8 +62,7 @@ class CLI < Thor
   private
 
   def to_time_object(time)
-    a = time.split(',').map(&:to_i)
-    Time.new(a[0],a[1],a[2],a[3],a[4],a[5])
+    Time.parse(time)
   end
 
   def time_file
