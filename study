@@ -6,43 +6,43 @@ class CLI < Thor
 
   desc 'start', 'study start'
   def start
-    unless File.exists? time_file
-
-      time = Time.now
-      puts "[#{time.strftime("%R")}]学習を開始しました"
-      File.open(time_file, 'w') do |txt|
-        txt.puts time.strftime('%Y,%m,%d,%H,%M,%S')
-      end
-    else
+    if File.exists? time_file
       puts 'すでに学習を始めています'
+      return
+    end
+
+    time = Time.now
+    puts "[#{time.strftime("%R")}]学習を開始しました"
+    File.open(time_file, 'w') do |txt|
+      txt.puts time.strftime('%Y,%m,%d,%H,%M,%S')
     end
   end
 
   desc 'finish', 'study finish'
   def finish
-    if File.exists? time_file
-
-      finished_time = Time.now
-      puts "[#{finished_time.strftime("%R")}]学習を終了しました"
-      started_time = File.open(time_file).read
-      File.delete(time_file)
-
-      started_time = to_time_object(started_time)
-
-      study_minutes = (finished_time - started_time).to_i / 60
-
-      puts '今回の学習時間は#{study_minutes}分です'
-
-      puts '学習内容を記入してください'
-      study_content = STDIN.gets.chomp
-
-      CSV.open(history_file, 'a') do |csv|
-        csv << [started_time.strftime('%Y-%m-%d %H:%M'),
-                finished_time.strftime('%Y-%m-%d %H:%M'),
-                study_minutes, study_content]
-      end
-    else
+    unless File.exists? time_file
       puts '学習を開始していません'
+      return
+    end
+
+    finished_time = Time.now
+    puts "[#{finished_time.strftime("%R")}]学習を終了しました"
+    started_time = File.open(time_file).read
+    File.delete(time_file)
+
+    started_time = to_time_object(started_time)
+
+    study_minutes = (finished_time - started_time).to_i / 60
+
+    puts '今回の学習時間は#{study_minutes}分です'
+
+    puts '学習内容を記入してください'
+    study_content = STDIN.gets.chomp
+
+    CSV.open(history_file, 'a') do |csv|
+      csv << [started_time.strftime('%Y-%m-%d %H:%M'),
+              finished_time.strftime('%Y-%m-%d %H:%M'),
+              study_minutes, study_content]
     end
   end
 
