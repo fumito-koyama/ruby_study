@@ -4,67 +4,66 @@ require 'csv'
 
 class CLI < Thor
 
-    desc 'start', 'study start'
-    def start
-        unless File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
-            
-            time = Time.now
-            p "[#{time.strftime("%R")}]学習を開始しました"
-            File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt', 'w') do |txt|
-                txt.puts time.strftime("%Y,%m,%d,%H,%M,%S")
-            end
-        else
-           p 'すでに学習を始めています'
-        end
+  desc 'start', 'study start'
+  def start
+    unless File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
+
+      time = Time.now
+      p "[#{time.strftime("%R")}]学習を開始しました"
+      File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt', 'w') do |txt|
+        txt.puts time.strftime("%Y,%m,%d,%H,%M,%S")
+      end
+    else
+      p 'すでに学習を始めています'
     end
+  end
 
-    desc 'finish', 'study finish'
-    def finish
-        if File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
+  desc 'finish', 'study finish'
+  def finish
+    if File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
 
-            finished_time = Time.now
-            p "[#{finished_time.strftime("%R")}]学習を終了しました"
-            started_time = File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt').read
-            File.delete('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
+      finished_time = Time.now
+      p "[#{finished_time.strftime("%R")}]学習を終了しました"
+      started_time = File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt').read
+      File.delete('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
 
-            started_time = to_time_object(started_time)
+      started_time = to_time_object(started_time)
 
-            study_minutes = (finished_time - started_time).to_i / 60
+      study_minutes = (finished_time - started_time).to_i / 60
 
-            p "今回の学習時間は#{study_minutes}分です"
+      p "今回の学習時間は#{study_minutes}分です"
 
-            p '学習内容を記入してください'
-            study_content = STDIN.gets.chomp
+      p '学習内容を記入してください'
+      study_content = STDIN.gets.chomp
 
-            CSV.open('/Users/fumito/dev/ruby_task/ruby_study/history.csv', 'a',) do |csv|
-                csv << [started_time.strftime("%Y-%m-%d %H:%M"), 
-                        finished_time.strftime("%Y-%m-%d %H:%M"),
-                         study_minutes, study_content]
-            end
-        else
-            p '学習を開始していません'
-        end
+      CSV.open('/Users/fumito/dev/ruby_task/ruby_study/history.csv', 'a',) do |csv|
+        csv << [started_time.strftime("%Y-%m-%d %H:%M"),
+                finished_time.strftime("%Y-%m-%d %H:%M"),
+                study_minutes, study_content]
+      end
+    else
+      p '学習を開始していません'
     end
+  end
 
-    desc 'total', 'output total time'
-    def total
-        t = 0
-        CSV.read('/Users/fumito/dev/ruby_task/ruby_study/history.csv').each{|row| t += row[2].to_i}
-        p "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
-    end
+  desc 'total', 'output total time'
+  def total
+    t = 0
+    CSV.read('/Users/fumito/dev/ruby_task/ruby_study/history.csv').each{|row| t += row[2].to_i}
+    p "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
+  end
 
-    # def stop
-    # end
+  # def stop
+  # end
 
-    # def restart
-    # end
-    private
-        def to_time_object(time)
-            a = time.split(',').map(&:to_i)
-            Time.new(a[0],a[1],a[2],a[3],a[4],a[5])
-        end
+  # def restart
+  # end
+  private
 
-
+  def to_time_object(time)
+    a = time.split(',').map(&:to_i)
+    Time.new(a[0],a[1],a[2],a[3],a[4],a[5])
+  end
 end
 
 CLI.start(ARGV)
