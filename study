@@ -6,11 +6,11 @@ class CLI < Thor
 
   desc 'start', 'study start'
   def start
-    unless File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
+    unless File.exists? time_file
 
       time = Time.now
       p "[#{time.strftime("%R")}]学習を開始しました"
-      File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt', 'w') do |txt|
+      File.open(time_file, 'w') do |txt|
         txt.puts time.strftime("%Y,%m,%d,%H,%M,%S")
       end
     else
@@ -20,12 +20,12 @@ class CLI < Thor
 
   desc 'finish', 'study finish'
   def finish
-    if File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
+    if File.exists? time_file
 
       finished_time = Time.now
       p "[#{finished_time.strftime("%R")}]学習を終了しました"
-      started_time = File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt').read
-      File.delete('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
+      started_time = File.open(time_file).read
+      File.delete(time_file)
 
       started_time = to_time_object(started_time)
 
@@ -36,7 +36,7 @@ class CLI < Thor
       p '学習内容を記入してください'
       study_content = STDIN.gets.chomp
 
-      CSV.open('/Users/fumito/dev/ruby_task/ruby_study/history.csv', 'a',) do |csv|
+      CSV.open(history_file, 'a') do |csv|
         csv << [started_time.strftime("%Y-%m-%d %H:%M"),
                 finished_time.strftime("%Y-%m-%d %H:%M"),
                 study_minutes, study_content]
@@ -49,7 +49,7 @@ class CLI < Thor
   desc 'total', 'output total time'
   def total
     t = 0
-    CSV.read('/Users/fumito/dev/ruby_task/ruby_study/history.csv').each{|row| t += row[2].to_i}
+    CSV.read(history_file).each{|row| t += row[2].to_i}
     p "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
   end
 
@@ -63,6 +63,14 @@ class CLI < Thor
   def to_time_object(time)
     a = time.split(',').map(&:to_i)
     Time.new(a[0],a[1],a[2],a[3],a[4],a[5])
+  end
+
+  def time_file
+    @time_file ||= File.expand_path('time.txt', __dir__)
+  end
+
+  def history_file
+    @history_file ||= File.expand_path('history.csv', __dir__)
   end
 end
 
