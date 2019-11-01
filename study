@@ -1,70 +1,82 @@
 require 'thor'
 #require 'fileutils'
 require 'csv'
-
+require 'time'
+#Rubyのインデントは2スペース
+#pはデバッグ用のためputsを用いる
 class CLI < Thor
 
-    desc 'start', 'study start'
-    def start
-        unless File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
-            
-            time = Time.now
-            p "[#{time.strftime("%R")}]学習を開始しました"
-            File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt', 'w') do |txt|
-                txt.puts time.strftime("%Y,%m,%d,%H,%M,%S")
-            end
-        else
-           p 'すでに学習を始めています'
-        end
+  desc 'start', 'study start'
+  def start
+    #アーリーリターンでインデントを浅くし見やすく
+    if File.exists? time_file
+      puts 'すでに学習を始めています'
+      return
     end
 
-    desc 'finish', 'study finish'
-    def finish
-        if File.exists?('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
+    time = Time.now
+    File.open(time_file, 'w') do |file|
+      file.puts time.to_s
+      puts "[#{time.strftime("%R")}]学習を開始しました"
+    end
+  end
 
-            finished_time = Time.now
-            p "[#{finished_time.strftime("%R")}]学習を終了しました"
-            started_time = File.open('/Users/fumito/dev/ruby_task/ruby_study/time.txt').read
-            File.delete('/Users/fumito/dev/ruby_task/ruby_study/time.txt')
-
-            started_time = to_time_object(started_time)
-
-            study_minutes = (finished_time - started_time).to_i / 60
-
-            p "今回の学習時間は#{study_minutes}分です"
-
-            p '学習内容を記入してください'
-            study_content = STDIN.gets.chomp
-
-            CSV.open('/Users/fumito/dev/ruby_task/ruby_study/history.csv', 'a',) do |csv|
-                csv << [started_time.strftime("%Y-%m-%d %H:%M"), 
-                        finished_time.strftime("%Y-%m-%d %H:%M"),
-                         study_minutes, study_content]
-            end
-        else
-            p '学習を開始していません'
-        end
+  desc 'finish', 'study finish'
+  def finish
+    unless File.exists? time_file
+      puts '学習を開始していません'
+      return
     end
 
-    desc 'total', 'output total time'
-    def total
-        t = 0
-        CSV.read('/Users/fumito/dev/ruby_task/ruby_study/history.csv').each{|row| t += row[2].to_i}
-        p "現在までの合計の学習時間は#{t/60}時間#{t%60}分です"
+    finished_time = Time.now
+    puts "[#{finished_time.strftime("%R")}]学習を終了しました"
+    started_time = File.open(time_file).read
+    File.delete(time_file)
+
+    started_time = to_time_object(started_time)
+
+    study_minutes = (finished_time - started_time).to_i / 60
+
+    puts "今回の学習時間は#{study_minutes}分です"
+
+    puts '学習内容を記入してください'
+    study_content = STDIN.gets.chomp
+
+    CSV.open(history_file, 'a') do |csv|
+      csv << [started_time.strftime('%Y-%m-%d %H:%M'),
+              finished_time.strftime('%Y-%m-%d %H:%M'),
+              study_minutes, study_content]
     end
+  end
 
-    # def stop
-    # end
+  desc 'total', 'output total time'
+  def total
+    
+    total = CSV.read(history_file).map { |row| row[2].to_i }.sum
+    puts "現在までの合計の学習時間は#{total/60}時間#{total%60}分です"
+  end
 
-    # def restart
-    # end
-    private
-        def to_time_object(time)
-            a = time.split(',').map(&:to_i)
-            Time.new(a[0],a[1],a[2],a[3],a[4],a[5])
-        end
+  # def stop
+  # end
 
+  # def restart
+  # end
+  private
+  #tTime#to_sで生成した文字列はTime.perseでTimeインスタンス化できる
+  def to_time_object(time)
+    Time.parse(time)
+  end
 
+  #ファイルパスを生成するメソッド(前回はなんども定義していたためドライでなかった) 
+  #__dir__で取得できる、実行中ディレクトリのフルpathを基準とし
+  #File.extend_pathでファイルの絶対pathを取得
+  def time_file
+    @time_file ||= File.expand_path('time.txt', __dir__)
+  end
+
+  def history_file
+    @history_file ||= File.expand_path('history.csv', __dir__)
+  end
 end
 
 CLI.start(ARGV)
